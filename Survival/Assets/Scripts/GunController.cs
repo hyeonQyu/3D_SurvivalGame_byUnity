@@ -15,6 +15,8 @@ public class GunController : MonoBehaviour
     private RaycastHit _hitInfo;    // 충돌 정보를 받아옴
     [SerializeField]
     private Camera _camera;
+    [SerializeField]
+    private GameObject _hitEffectPrefab;    // 피격 효과
 
     void Start()
     {
@@ -76,7 +78,8 @@ public class GunController : MonoBehaviour
     {
         if(Physics.Raycast(_camera.transform.position, _camera.transform.forward, out _hitInfo, _currentGun.Range))
         {
-            Debug.Log(_hitInfo.transform.name);
+            GameObject clone = Instantiate(_hitEffectPrefab, _hitInfo.point, Quaternion.LookRotation(_hitInfo.normal));    // 피격되는 사물의 방향으로 로테이션이 이루어짐
+            Destroy(clone, 1f);
         }
     }
 
