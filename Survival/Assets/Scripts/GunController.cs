@@ -6,6 +6,11 @@ public class GunController : MonoBehaviour
 {
     [SerializeField]
     private Gun _currentGun;    // 현재 장착된 총
+    public Gun CurrentGun
+    {
+        get { return _currentGun; }
+        set { _currentGun = value; }
+    }
     private float _currentFireRate;     // 연사 속도 계산
     private AudioSource _audioSource;   // 효과음
     // 상태 변수
