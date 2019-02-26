@@ -19,6 +19,8 @@ public class PlayerController:MonoBehaviour
     // 상태 변수
     private bool _isRunning = false;
     private bool _isCrouching = false;
+    private bool _isWalking = false;
+    private bool _isOnGround = true;
 
     // 숙이기 정도 변수
     [SerializeField]
@@ -39,40 +41,47 @@ public class PlayerController:MonoBehaviour
     private Rigidbody _myRigid;
     private CapsuleCollider _capsuleCollider;
     private GunController _theGunController;
+    private Crosshair _crosshair;
 
     // Start is called before the first frame update
     void Start()
     {
         _myRigid = GetComponent<Rigidbody>();
-        _applySpeed = _walkSpeed;
+        _crosshair = FindObjectOfType<Crosshair>();   
         _capsuleCollider = GetComponent<CapsuleCollider>();
+        _theGunController = FindObjectOfType<GunController>();
+
+        _applySpeed = _walkSpeed;
         _originPosY = _camera.transform.localPosition.y;
         _applyCrouchPosY = _originPosY;
-        _theGunController = FindObjectOfType<GunController>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        IsOnGround();
         TryJump();
         TryRun();
         TryCrouch();
         Move();
+        CheckMove();
         RotateCamera();
         RotateCharacter();
     }
 
     private void TryJump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && IsOnGround())
+        if (Input.GetKeyDown(KeyCode.Space) && _isOnGround)
         {
             Jump();
         }
     }
 
-    private bool IsOnGround()       // 점프를 위해 땅에 닿아있는지 여부
+    private void IsOnGround()       // 점프를 위해 땅에 닿아있는지 여부
     {
-        return Physics.Raycast(transform.position, Vector3.down, _capsuleCollider.bounds.extents.y + 0.1f);
+        _isOnGround = Physics.Raycast(transform.position, Vector3.down, _capsuleCollider.bounds.extents.y + 0.15f);
+        _crosshair.PlayRunningAnimation(!_isOnGround);
+        Debug.Log(_isOnGround);
     }
 
     private void Jump()
@@ -103,12 +112,14 @@ public class PlayerController:MonoBehaviour
         _theGunController.CancelFineSight();
 
         _isRunning = true;
+        _crosshair.PlayRunningAnimation(_isRunning);
         _applySpeed = _runSpeed;
     }
 
     private void StopRun()
     {
         _isRunning = false;
+        _crosshair.PlayRunningAnimation(_isRunning);
         _applySpeed = _walkSpeed;
     }
 
@@ -123,6 +134,7 @@ public class PlayerController:MonoBehaviour
     private void Crouch()
     {
         _isCrouching = !_isCrouching;
+        _crosshair.PlayCrouchingAnimation(_isCrouching);
 
         if (_isCrouching)
         {
@@ -169,6 +181,26 @@ public class PlayerController:MonoBehaviour
         Vector3 velocity = (moveHorizontal + moveVertical).normalized * _applySpeed;
 
         _myRigid.MovePosition(transform.position + velocity * Time.deltaTime);
+    }
+
+    private void CheckMove()
+    {
+        if(!_isRunning && !_isCrouching && _isOnGround)
+        {
+            float moveDirX = Input.GetAxisRaw("Horizontal");        // 좌우
+            float moveDirZ = Input.GetAxisRaw("Vertical");          // 전후
+
+            //if(Vector3.Distance(_lastPos, transform.position) >= 0.01f)
+            if(moveDirX >= 0.01f || moveDirX <= -0.01f || moveDirZ >= 0.01f || moveDirZ <= -0.01f)
+            {
+                _isWalking = true;
+            }
+
+            else
+                _isWalking = false;
+
+            _crosshair.PlayWalkingAnimation(_isWalking);
+        }
     }
 
     private void RotateCamera() // 상하 카메라 회전
