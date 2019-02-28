@@ -6,6 +6,11 @@ public class Hand : MonoBehaviour
 {
     [SerializeField]
     private string _handName;   // 너클이나 맨손을 구분
+    public string HandName
+    {
+        get { return _handName; }
+        set { _handName = value; }
+    }
     [SerializeField]
     private float _range;       // 공격 범위
     public float Range

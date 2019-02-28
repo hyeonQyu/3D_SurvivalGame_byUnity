@@ -80,8 +80,7 @@ public class PlayerController:MonoBehaviour
     private void IsOnGround()       // 점프를 위해 땅에 닿아있는지 여부
     {
         _isOnGround = Physics.Raycast(transform.position, Vector3.down, _capsuleCollider.bounds.extents.y + 0.15f);
-        _crosshair.PlayRunningAnimation(!_isOnGround);
-        Debug.Log(_isOnGround);
+        _crosshair.PlayJumpingAnimation(!_isOnGround);
     }
 
     private void Jump()
